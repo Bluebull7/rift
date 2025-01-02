@@ -10,12 +10,14 @@ class RedisMemory:
             password=password,
             decode_responses=True
         )
-
+        
     def set(self, key: str, value: Any, expire=None):
         """Store data in Redis."""
         if isinstance(value, (dict, list)):
-            value = json.dumps(value)
+            value = json.dumps(value)  # Serialize only once
         self.client.set(key, value, ex=expire)
+        print(f"[DEBUG] SET key={key}, value={value}")  # Debug log
+
 
     def get(self, key: str) -> Any:
         """Retrieve data from Redis."""
