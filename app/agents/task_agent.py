@@ -1,5 +1,5 @@
-from base_agent import BaseAgent
-from utils.memory_trigger import MemoryTrigger
+from app.agents.base_agent import BaseAgent
+from app.utils.memory_trigger import MemoryTrigger
 from datetime import datetime
 
 class TaskAgent(BaseAgent):
