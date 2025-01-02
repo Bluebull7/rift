@@ -26,11 +26,21 @@ class TechAgent(BaseAgent):
         else:
             self.log(f"Task {task_id} not found.")
             return f"Task {task_id} not found."
+        
+    def analyze_data(self, task_id, data):
+        # Example analysis: Generate summary stats
+        analysis_result = {"task_id": task_id, "summary": f"Analyzed {len(data)} items"}
+        self.memory.set(self.memory_key(f"analysis:{task_id}"), analysis_result)
+        self.memory.hset(f"shared:task_context:{task_id}", "TechAgent_analysis", analysis_result)
+        self.log(f"Analysis for task {task_id} saved: {analysis_result}")
+        return analysis_result
 
     def parse_command(self, command, *args, **kwargs):
         if command == "save_task":
             return self.save_task(*args, **kwargs)
         elif command == "get_task":
             return self.get_task(*args, **kwargs)
+        elif command == "analyze_data":
+            return self.analyze_data(*args, **kwargs)
         else:
             return f"Unknown command: {command}"

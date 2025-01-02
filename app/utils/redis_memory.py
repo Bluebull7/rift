@@ -38,3 +38,27 @@ class RedisMemory:
     def get_list(self, key: str) -> list:
         """Retrieve list data from Redis."""
         return [json.loads(item) for item in self.client.lrange(key, 0, -1)]
+
+    def hset(self, key: str, field: str, value: Any):
+        """Set a field in a Redis hash."""
+        if isinstance(value, (dict, list)):
+            value = json.dumps(value)
+        self.client.hset(key, field, value)
+
+    def hget(self, key: str, field: str) -> Any:
+        """Get a field from a Redis hash."""
+        value = self.client.hget(key, field)
+        try:
+            return json.loads(value)
+        except (TypeError, json.JSONDecodeError):
+            return value
+
+    def rpush(self, key: str, value: Any):
+        """Append a value to a Redis list."""
+        if isinstance(value, (dict, list)):
+            value = json.dumps(value)
+        self.client.rpush(key, value)
+
+    def lrange(self, key: str, start: int, end: int) -> list:
+        """Retrieve a range of elements from a Redis list."""
+        return [json.loads(item) for item in self.client.lrange(key, start, end)]
