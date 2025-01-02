@@ -18,6 +18,9 @@ class TaskAgent(BaseAgent):
             self.assign_task(*args, **kwargs)
         elif command == "get_assigned_tasks":
             return self.get_assigned_tasks(*args, **kwargs)
+        
+        elif command == "track_progress":
+            return self.track_progress(*args, **kwargs)
         else:
             self.log(f"Unknown command: {command}")
 
@@ -39,3 +42,13 @@ class TaskAgent(BaseAgent):
                 task_data = self.memory.get(self.memory_key(f"task:{task}"))
                 if task_data and datetime.fromisoformat(task_data["deadline"]) < datetime.now():
                     self.log(f"Overdue Task: {task} assigned to {user} is overdue.")
+    
+    def track_progress(self, task_id):
+        # Check if all dependencies are resolved
+        context = self.memory.hgetall(f"shared:task_context:{task_id}")
+        if "TechAgent_analysis" in context and "ConceptAgent_narrative" in context:
+            progress = {"task_id": task_id, "status": "completed"}
+            self.memory.set(self.memory_key(f"progress:{task_id}"), progress)
+            self.log(f"Task {task_id} marked as completed: {progress}")
+            return progress
+        return {"task_id": task_id, "status": "in-progress"}
