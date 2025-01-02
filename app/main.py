@@ -1,8 +1,10 @@
-from tech_agent import TechAgent
-from concept_agent import ConceptAgent
-from redis_memory import RedisMemory
-from task_agent import TaskAgent
-from base_agent import BaseAgent
+from agents.tech_agent import TechAgent
+from agents.concept_agent import ConceptAgent
+from utils.redis_memory import RedisMemory
+from agents.task_agent import TaskAgent
+from agents.base_agent import BaseAgent
+
+
 
 if __name__ == "__main__":
     memory = RedisMemory()

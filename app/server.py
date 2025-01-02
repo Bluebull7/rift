@@ -1,6 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from typing import List
-from redis_memory import RedisMemory  # Use the RedisMemory class from previous examples
+from utils.redis_memory import RedisMemory  # Use the RedisMemory class from previous examples
 
 app = FastAPI()
 

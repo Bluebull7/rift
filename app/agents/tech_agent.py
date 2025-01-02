@@ -1,5 +1,5 @@
 from base_agent import BaseAgent
-from memory_trigger import MemoryTrigger
+from utils.memory_trigger import MemoryTrigger
 
 class TechAgent(BaseAgent):
     def __init__(self, memory):
@@ -10,6 +10,7 @@ class TechAgent(BaseAgent):
     def save_task(self, task_id, task_details):
         self.memory.set(self.memory_key(f"task:{task_id}"), task_details)
         self.log(f"Task {task_id} saved.")
+        return f"Task {task_id} saved successfully."
 
     def get_task(self, task_id):
         return self.memory.get(self.memory_key(f"task:{task_id}"))
