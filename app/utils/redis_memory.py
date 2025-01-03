@@ -9,16 +9,14 @@ class RedisMemory:
             port=port,
             password=password,
             decode_responses=True
-        )
-        
+        )       
     def set(self, key: str, value: Any, expire=None):
         """Store data in Redis."""
         if isinstance(value, (dict, list)):
             value = json.dumps(value)  # Serialize only once
         self.client.set(key, value, ex=expire)
         print(f"[DEBUG] SET key={key}, value={value}")  # Debug log
-
-
+    
     def get(self, key: str) -> Any:
         """Retrieve data from Redis."""
         value = self.client.get(key)
@@ -62,3 +60,21 @@ class RedisMemory:
     def lrange(self, key: str, start: int, end: int) -> list:
         """Retrieve a range of elements from a Redis list."""
         return [json.loads(item) for item in self.client.lrange(key, start, end)]
+    
+    def publish(self, channel: str, message: dict):
+        """Publish a message to a Redis channel."""
+        self.client.publish(channel, json.dumps(message))
+
+    def subscribe(self, channel: str, callback):
+        """Subscribe to a Redis channel and process messages using a callback."""
+        pubsub = self.client.pubsub()
+        pubsub.subscribe(**{channel: callback})
+
+        def listen():
+            for message in pubsub.listen():
+                if message["type"] == "message":
+                    callback(json.loads(message["data"]))
+
+        # Run subscription in a separate thread
+        thread = threading.Thread(target=listen, daemon=True)
+        thread.start()
