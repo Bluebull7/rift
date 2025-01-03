@@ -1,7 +1,8 @@
 import os
 import sys
-
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+
+import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from app.utils.redis_memory import RedisMemory
 from app.utils.memory_trigger import MemoryTrigger
@@ -55,6 +56,11 @@ async def websocket_endpoint(websocket: WebSocket):
             query = await websocket.receive_text()
             print(f"[DEBUG] Received query: {query}")
             response = query_processor.process_query(query)
+
+            # Ensure the response is sent as a string
+            if isinstance(response, (dict, list)):
+                response = json.dumps(response)  # Convert to JSON string
+
             print(f"[DEBUG] Response: {response}")
             await websocket.send_text(response)
     except WebSocketDisconnect:
