@@ -64,17 +64,23 @@ class RedisMemory:
     
     def publish(self, channel: str, message: dict):
         """Publish a message to a Redis channel."""
-        self.client.publish(channel, json.dumps(message))
+        serialized_message = json.dumps(message)
+        self.client.publish(channel, serialized_message)
+        print(f"[PUB] Channel: {channel}, Message: {serialized_message}")
 
     def subscribe(self, channel: str, callback):
         """Subscribe to a Redis channel and process messages using a callback."""
         pubsub = self.client.pubsub()
         pubsub.subscribe(**{channel: callback})
+        print(f"[SUB] Subscribed to channel: {channel}")
 
         def listen():
+            print(f"[SUB] Listening on channel: {channel}")
             for message in pubsub.listen():
                 if message["type"] == "message":
-                    callback(json.loads(message["data"]))
+                    data = json.loads(message["data"])
+                    print(f"[MSG] Channel: {channel}, Message: {data}")
+                    callback(data)
 
         # Run subscription in a separate thread
         thread = threading.Thread(target=listen, daemon=True)
