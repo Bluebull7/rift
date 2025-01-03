@@ -7,6 +7,12 @@ class ConceptAgent(BaseAgent):
 
         # Subscribe to updates
         self.memory.subscribe("global_updates", self.handle_update)
+        
+    def parse_command(self, command, *args, **kwargs):
+        if command == "generate_narrative":
+            return self.generate_narrative(*args, **kwargs)
+        else:
+            return f"Unknown command: {command}"
 
     def generate_narrative(self, task_id):
         analysis = self.memory.hget(f"shared:task_context:{task_id}", "TechAgent_analysis")

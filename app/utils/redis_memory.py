@@ -1,6 +1,7 @@
 import redis
 import json
 from typing import Any
+import threading
 
 class RedisMemory:
     def __init__(self, host="localhost", port=6379, password=None):
