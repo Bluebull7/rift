@@ -4,7 +4,9 @@ from app.utils.memory_trigger import MemoryTrigger
 from app.agents.tech_agent import TechAgent
 from app.agents.concept_agent import ConceptAgent
 from app.agents.task_agent import TaskAgent
+from app.agents import base_agent
 from typing import List
+from app.utils import query_processor
 
 app = FastAPI()
 
@@ -39,12 +41,11 @@ def register_agent(agent_name: str, agent_instance):
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    """WebSocket endpoint for real-time interaction."""
     await manager.connect(websocket)
     try:
         while True:
-            data = await websocket.receive_text()
-            response = handle_message(data)
+            query = await websocket.receive_text()
+            response = query_processor.process_query(query)
             await websocket.send_text(response)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
