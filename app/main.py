@@ -1,10 +1,18 @@
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+
+import json
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from app.utils.redis_memory import RedisMemory
 from app.utils.memory_trigger import MemoryTrigger
 from app.agents.tech_agent import TechAgent
 from app.agents.concept_agent import ConceptAgent
 from app.agents.task_agent import TaskAgent
+from app.agents import base_agent
 from typing import List
+from utils.query_processor import QueryProcessor
+
 
 app = FastAPI()
 
@@ -36,18 +44,28 @@ agents = {}
 def register_agent(agent_name: str, agent_instance):
     """Register an agent for command delegation."""
     agents[agent_name] = agent_instance
+# Initialize QueryProcessor with registered agents
+query_processor = QueryProcessor(agents)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    """WebSocket endpoint for real-time interaction."""
     await manager.connect(websocket)
+    print("[DEBUG] WebSocket client connected.")
     try:
         while True:
-            data = await websocket.receive_text()
-            response = handle_message(data)
+            query = await websocket.receive_text()
+            print(f"[DEBUG] Received query: {query}")
+            response = query_processor.process_query(query)
+
+            # Ensure the response is sent as a string
+            if isinstance(response, (dict, list)):
+                response = json.dumps(response)  # Convert to JSON string
+
+            print(f"[DEBUG] Response: {response}")
             await websocket.send_text(response)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+        print("[DEBUG] WebSocket client disconnected.")
 
 def handle_message(message: str) -> str:
     """
