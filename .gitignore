@@ -12,3 +12,4 @@ frontend/build/
 
 # Node
 frontend/package-lock.json
+dev_modules.json
