@@ -2,7 +2,6 @@ import re
 import json
 
 class QueryProcessor:
-    
     def __init__(self, agents):
         self.agents = agents
 

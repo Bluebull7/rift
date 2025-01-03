@@ -1,3 +1,7 @@
+import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from app.utils.redis_memory import RedisMemory
 from app.utils.memory_trigger import MemoryTrigger
@@ -6,7 +10,8 @@ from app.agents.concept_agent import ConceptAgent
 from app.agents.task_agent import TaskAgent
 from app.agents import base_agent
 from typing import List
-from app.utils import query_processor
+from utils.query_processor import QueryProcessor
+
 
 app = FastAPI()
 
@@ -38,17 +43,23 @@ agents = {}
 def register_agent(agent_name: str, agent_instance):
     """Register an agent for command delegation."""
     agents[agent_name] = agent_instance
+# Initialize QueryProcessor with registered agents
+query_processor = QueryProcessor(agents)
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await manager.connect(websocket)
+    print("[DEBUG] WebSocket client connected.")
     try:
         while True:
             query = await websocket.receive_text()
+            print(f"[DEBUG] Received query: {query}")
             response = query_processor.process_query(query)
+            print(f"[DEBUG] Response: {response}")
             await websocket.send_text(response)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+        print("[DEBUG] WebSocket client disconnected.")
 
 def handle_message(message: str) -> str:
     """
