@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, TextField, Button, Grid, Paper, List, ListItem, ListItemText } from "@mui/material";
+import { Box, Typography, TextField, Button, Grid, Paper, List, ListItem, ListItemText, LinearProgress } from "@mui/material";
 import useWebSocket from "react-use-websocket";
 
 function App() {
@@ -41,22 +41,21 @@ function App() {
       </Typography>
       <Grid container spacing={2}>
         {/* Task Progress */}
-        <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
-            <Typography variant="h6">Task Progress</Typography>
-            <List>
-              {tasks.map((task, index) => (
-                <ListItem key={index}>
-                  <ListItemText
-                    primary={`Task ${task.task_id}`}
-                    secondary={`Status: ${task.status || "In Progress"}`}
-                  />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-        </Grid>
-
+        <List>
+  {tasks.map((task, index) => (
+    <ListItem key={index}>
+      <ListItemText
+        primary={`Task ${task.task_id}`}
+        secondary={`Status: ${task.status || "In Progress"}`}
+      />
+      {task.status === "completed" ? (
+        <Typography color="green">Completed</Typography>
+      ) : (
+        <LinearProgress sx={{ width: "100%" }} />
+      )}
+    </ListItem>
+  ))}
+</List>
         {/* Agent Logs */}
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ padding: 2 }}>
