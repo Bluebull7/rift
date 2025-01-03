@@ -69,7 +69,8 @@ project_root/
 
 5. Run the FastAPI server:
    ```bash
-   uvicorn app.main:app --reload
+   cd app
+   uvicorn main:app --reload
    ```
 
 6. Test the WebSocket connection using `websocat`:
