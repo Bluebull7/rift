@@ -1,37 +1,115 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, TextField, Button, Grid, Paper, List, ListItem, ListItemText, LinearProgress } from "@mui/material";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  LinearProgress,
+  Snackbar,
+} from "@mui/material";
+import { Bar } from "react-chartjs-2";
 import useWebSocket from "react-use-websocket";
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [logs, setLogs] = useState([]);
   const [input, setInput] = useState("");
-  const [socketUrl] = useState("ws://localhost:8000/ws"); // WebSocket URL
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [socketUrl] = useState("ws://localhost:8000/ws");
   const { sendMessage, lastMessage } = useWebSocket(socketUrl, {
     onOpen: () => console.log("Connected to WebSocket"),
     onMessage: (message) => handleWebSocketMessage(message),
     onError: (error) => console.error("WebSocket error:", error),
   });
 
-  // Handle incoming WebSocket messages
-  const handleWebSocketMessage = (message) => {
-    const data = JSON.parse(message.data || "{}");
+  useEffect(() => {
+    if (lastMessage) {
+      const data = JSON.parse(lastMessage.data || "{}");
 
-    if (data.task_id) {
-      // Update task progress
-      setTasks((prev) => [...prev.filter((t) => t.task_id !== data.task_id), data]);
-    } else if (data.log) {
-      // Update logs
-      setLogs((prev) => [data.log, ...prev]);
+      if (data.task_id) {
+        setTasks((prev) => [
+          ...prev.filter((t) => t.task_id !== data.task_id),
+          data,
+        ]);
+      } else if (data.log) {
+        setLogs((prev) => [data.log, ...prev]);
+      }
     }
+  }, [lastMessage]);
+
+  const handleWebSocketMessage = (message) => {
+    console.log("Received message:", message);
   };
 
-  // Handle form submission
   const handleSendCommand = () => {
     if (input) {
       sendMessage(input);
       setInput("");
+      setSnackbarMessage("Command sent successfully!");
+      setSnackbarOpen(true);
     }
+  };
+
+  const handleLogin = async () => {
+    const response = await fetch("http://localhost:8000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    if (response.ok) {
+      setIsLoggedIn(true);
+    } else {
+      alert("Invalid credentials");
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <Box sx={{ padding: 2 }}>
+        <Typography variant="h4">Login</Typography>
+        <TextField
+          label="Username"
+          fullWidth
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          sx={{ marginBottom: 2 }}
+        />
+        <TextField
+          label="Password"
+          type="password"
+          fullWidth
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          sx={{ marginBottom: 2 }}
+        />
+        <Button variant="contained" onClick={handleLogin}>
+          Login
+        </Button>
+      </Box>
+    );
+  }
+
+  const taskData = {
+    labels: ["Completed", "In Progress"],
+    datasets: [
+      {
+        label: "Tasks",
+        data: [
+          tasks.filter((t) => t.status === "completed").length,
+          tasks.filter((t) => t.status !== "completed").length,
+        ],
+        backgroundColor: ["green", "orange"],
+      },
+    ],
   };
 
   return (
@@ -40,23 +118,26 @@ function App() {
         Agent Dashboard
       </Typography>
       <Grid container spacing={2}>
-        {/* Task Progress */}
-        <List>
-  {tasks.map((task, index) => (
-    <ListItem key={index}>
-      <ListItemText
-        primary={`Task ${task.task_id}`}
-        secondary={`Status: ${task.status || "In Progress"}`}
-      />
-      {task.status === "completed" ? (
-        <Typography color="green">Completed</Typography>
-      ) : (
-        <LinearProgress sx={{ width: "100%" }} />
-      )}
-    </ListItem>
-  ))}
-</List>
-        {/* Agent Logs */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ padding: 2 }}>
+            <Typography variant="h6">Task Progress</Typography>
+            <List>
+              {tasks.map((task, index) => (
+                <ListItem key={index}>
+                  <ListItemText
+                    primary={`Task ${task.task_id}`}
+                    secondary={`Status: ${task.status || "In Progress"}`}
+                  />
+                  {task.status === "completed" ? (
+                    <Typography color="green">Completed</Typography>
+                  ) : (
+                    <LinearProgress sx={{ width: "100%" }} />
+                  )}
+                </ListItem>
+              ))}
+            </List>
+          </Paper>
+        </Grid>
         <Grid item xs={12} md={6}>
           <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h6">Agent Logs</Typography>
@@ -70,8 +151,6 @@ function App() {
           </Paper>
         </Grid>
       </Grid>
-
-      {/* Command Input */}
       <Box sx={{ marginTop: 2 }}>
         <Paper elevation={3} sx={{ padding: 2 }}>
           <Typography variant="h6">Send Command</Typography>
@@ -88,6 +167,16 @@ function App() {
           </Button>
         </Paper>
       </Box>
+      <Paper elevation={3} sx={{ padding: 2, marginTop: 2 }}>
+        <Typography variant="h6">Task Metrics</Typography>
+        <Bar data={taskData} />
+      </Paper>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </Box>
   );
 }
