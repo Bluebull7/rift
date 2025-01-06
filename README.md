@@ -1,7 +1,7 @@
-# Multi-Agent Collaboration System
+**# Rift
 
 ## Overview
-This project is a Redis-backed multi-agent collaboration system built with FastAPI and WebSocket. The system features agents that share context and collaborate on tasks by leveraging Redis as shared memory. Each agent specializes in a specific function and interacts with others to complete workflows efficiently.
+Rift is a Redis-backed multi-agent collaboration system built with FastAPI and WebSocket. Rift features agents that share context and collaborate on tasks by leveraging Redis as shared memory. Each agent specializes in a specific function and interacts with others to complete workflows efficiently.
 
 ### Key Features
 - **TechAgent**: Performs data analysis and stores results in Redis.
@@ -181,3 +181,4 @@ This project is licensed under the MIT License. See `LICENSE` for details.
 - **websocat**: For WebSocket debugging.
 
 ---
+**
