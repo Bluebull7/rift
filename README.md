@@ -1,4 +1,4 @@
-**#![rift logo](https://github.com/bluebull7/rift/blob/master/frontend/dashboard/public/rift%20logo.png?raw=True)
+**#![rift logo](https://github.com/bluebull7/rift/blob/master/frontend/dashboard/public/rift_github.png?raw=True)
 
 
 ## Overview
