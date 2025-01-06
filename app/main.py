@@ -12,10 +12,19 @@ from app.agents.task_agent import TaskAgent
 from app.agents import base_agent
 from typing import List
 from utils.query_processor import QueryProcessor
-
+from fastapi import HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 app = FastAPI()
-
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow requests from all origins (adjust as needed)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 # Memory and trigger setup
 memory = RedisMemory()
 trigger = MemoryTrigger(memory)
@@ -46,6 +55,24 @@ def register_agent(agent_name: str, agent_instance):
     agents[agent_name] = agent_instance
 # Initialize QueryProcessor with registered agents
 query_processor = QueryProcessor(agents)
+
+USERS = {
+    "admin": "password123",
+    "user1": "mypassword",
+    "user2": "1234",
+}
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@app.post("/login")
+async def login(request: LoginRequest):
+    """
+    Validate login using JSON payload.
+    """
+    if request.username in USERS and USERS[request.username] == request.password:
+        return {"message": f"Login successful for user '{request.username}'"}
+    raise HTTPException(status_code=401, detail="Invalid username or password")
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):

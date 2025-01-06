@@ -5,3 +5,11 @@ __pycache__/
 
 # Redis
 dump.rdb
+
+# React
+frontend/node_modules/
+frontend/build/
+
+# Node
+frontend/package-lock.json
+dev_modules.json
