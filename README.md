@@ -1,4 +1,5 @@
-**# Rift
+**#![alt text](https://github.com/bluebull7/rift/blob/master/rift_logo.png?raw=true)
+
 
 ## Overview
 Rift is a Redis-backed multi-agent collaboration system built with FastAPI and WebSocket. Rift features agents that share context and collaborate on tasks by leveraging Redis as shared memory. Each agent specializes in a specific function and interacts with others to complete workflows efficiently.
