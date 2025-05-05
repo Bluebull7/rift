@@ -14,6 +14,19 @@ import {
 } from "@mui/material";
 import { Bar } from "react-chartjs-2";
 import useWebSocket from "react-use-websocket";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+
+// Register required components and scales
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -139,7 +152,7 @@ function App() {
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ padding: 2 }}>
+       f   <Paper elevation={3} sx={{ padding: 2 }}>
             <Typography variant="h6">Agent Logs</Typography>
             <List>
               {logs.map((log, index) => (
